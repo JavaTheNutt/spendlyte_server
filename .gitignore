@@ -1,0 +1,5 @@
+functions/node_modules/
+.idea/
+functions/lib
+functions/firebase-debug.log
+

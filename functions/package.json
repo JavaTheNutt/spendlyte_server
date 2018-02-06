@@ -7,7 +7,8 @@
     "shell": "npm run build && firebase experimental:functions:shell",
     "start": "npm run shell",
     "deploy": "firebase deploy --only functions",
-    "logs": "firebase functions:log"
+    "logs": "firebase functions:log",
+    "test": "mocha -r ts-node/register src/**/*.spec.ts"
   },
   "main": "lib/index.js",
   "dependencies": {

@@ -17,7 +17,8 @@
     "express": "^4.16.2",
     "firebase-admin": "~5.8.1",
     "firebase-functions": "^0.8.1",
-    "method-override": "^2.3.10"
+    "method-override": "^2.3.10",
+    "moment": "^2.20.1"
   },
   "devDependencies": {
     "@types/chai": "^4.1.2",

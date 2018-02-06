@@ -2,6 +2,9 @@ import * as express from 'express';
 import * as cookieParser from 'cookie-parser';
 import * as cors from 'cors';
 import routes from './routes';
+import * as admin from 'firebase-admin';
+import * as functions from 'firebase-functions';
+
 export default class Server {
 	public app: express.Application;
 
@@ -13,6 +16,7 @@ export default class Server {
 		this.app = express();
 		this.config();
 		this.routes();
+		admin.initializeApp(functions.config().firebase);
 	}
 
 	public config () {
@@ -25,21 +29,4 @@ export default class Server {
 	}
 }
 
-
-
-
-
-
-
-/*import * as express from 'express';
-import cors from 'cors';
-import cookieParser from 'cookie-parser';
-
-const app = express();
-app.use(cors({origin: true}));
-app.use(cookieParser());
-
-app.listen(3000, () => console.log('app started on port 3000'));
-
-export default app;*/
 

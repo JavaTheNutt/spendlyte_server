@@ -14,6 +14,8 @@ describe('Transaction.ts', () => {
 			const newTransaction = transaction.clone();
 			expect(transaction).to.not.equal(newTransaction);
 			expect(transaction).to.eql(newTransaction);
+			newTransaction.id = 'someotherid';
+			expect(transaction.id).to.equal('someid');
 		});
 	});
 	describe('isFuture', ()=>{

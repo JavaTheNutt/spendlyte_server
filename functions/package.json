@@ -4,11 +4,13 @@
     "lint": "./node_modules/.bin/tslint -p tslint.json",
     "build": "./node_modules/.bin/tsc",
     "serve": "npm run build && cross-env NODE_ENV=development firebase serve --only functions",
+    "serve:no-build": "cross-env NODE_ENV=development firebase serve --only functions",
     "shell": "npm run build && firebase experimental:functions:shell",
     "start": "npm run shell",
     "deploy": "firebase deploy --only functions",
     "logs": "firebase functions:log",
-    "test": "mocha -r ts-node/register src/**/*.spec.ts"
+    "test": "mocha -r ts-node/register src/**/*.spec.ts",
+    "dev": "nodemon --watch lib --exec npm run serve:no-build"
   },
   "main": "lib/index.js",
   "dependencies": {
@@ -32,6 +34,7 @@
     "chai": "^4.1.2",
     "cross-env": "^5.1.3",
     "mocha": "^5.0.0",
+    "nodemon": "^1.14.12",
     "ts-node": "^4.1.0",
     "tslint": "^5.8.0",
     "typescript": "^2.5.3"

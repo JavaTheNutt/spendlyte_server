@@ -67,4 +67,7 @@ export default class Transaction {
 	public mapForClient(): {id: string, title: string, amount: number, frequency: string, due: string} {
 		return {id: this.id, title: this.title, amount: this.amount, frequency: this.frequency, due: this.nextDueDate}
 	}
+	public isRecurring (): boolean {
+		return this.frequency === 'Daily' || this.frequency === 'Weekly' || this.frequency === 'Monthly';
+	}
 }

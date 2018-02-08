@@ -61,7 +61,10 @@ export default class Transaction {
 		return date.isSameOrAfter(moment());
 	}
 
-	public clone(){
+	public clone(): Transaction{
 		return new Transaction(this.id, this.title, this.amount, this.frequency, this.nextDueDate)
+	}
+	public mapForClient(): {id: string, title: string, amount: number, frequency: string, due: string} {
+		return {id: this.id, title: this.title, amount: this.amount, frequency: this.frequency, due: this.nextDueDate}
 	}
 }

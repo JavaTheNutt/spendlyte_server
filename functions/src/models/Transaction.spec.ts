@@ -30,4 +30,11 @@ describe('Transaction.ts', () => {
 			expect(transaction.isFuture()).to.be.false;
 		});
 	});
+	describe('mapForClient', () => {
+		it('should return the transaction in mapped format', () => {
+			const transaction = new Transaction('someid', 'wages', 2333, 'Monthly', '2018-09-09');
+			const mappedTransaction = transaction.mapForClient();
+			expect(mappedTransaction).to.eql({id: 'someid', title: 'wages', amount: 2333, frequency: 'Monthly', due: '2018-09-09'})
+		})
+	})
 });

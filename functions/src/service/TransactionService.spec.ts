@@ -1,11 +1,18 @@
-import { expect } from 'chai';
-
-import { getFutureTransactions, getNextDate } from './TransactionService';
+import * as chai from 'chai';
+import * as sinon from 'sinon';
+import * as sinonChai from 'sinon-chai';
+import { getFutureTransactions, getNextDate, getFutureIncomes } from './TransactionService';
+import * as FirebaseUtil from '../util/Firestore';
 import 'mocha';
 import * as moment from 'moment';
 import Transaction from "../models/Transaction";
+import Result from "../dto/Result";
 
+chai.use(sinonChai);
+const expect = chai.expect;
+const sandbox = sinon.sandbox.create();
 describe('TransactionService', () => {
+	afterEach(() => sandbox.restore())
 	describe('getFutureTransactions', () => {
 		it('should return 12 Weekly transactions by default', () => {
 			const transaction = new Transaction('something', 'wages', 2300, 'Weekly', moment().format('YYYY-MM-DD'));
@@ -87,6 +94,27 @@ describe('TransactionService', () => {
 		});
 	});
 	describe('getFutureIncomes', ()=>{
-		it('should fetch a generate a list of transactions based on the results of the db query')
+		let fetchCollectionStub;
+		beforeEach(() => {
+			const transaction = new Transaction('someid', 'wages', 4500, 'Monthly', moment().add(1, 'days').format('YYYY-MM-DD'));
+			const transaction2 = new Transaction('someid', 'wages', 4500, 'Weekly', moment().add(1, 'days').format('YYYY-MM-DD'));
+			fetchCollectionStub = sandbox.stub(FirebaseUtil, 'fetchCollection');
+			const result = new Result();
+			result.data = [transaction, transaction2];
+			result.success = true;
+			fetchCollectionStub.resolves(result);
+		});
+		it('should generate a list of transactions based on the results of the db query', async () => {
+			const resultList : Result = await getFutureIncomes('someuserid');
+			expect(resultList.data.length).to.equal(15);
+		});
+		it('should respect the number parameter', async () => {
+			const resultList : Result = await getFutureIncomes('someuserid', 1);
+			expect(resultList.data.length).to.equal(5);
+		});
+		it('should respect the skip parameter', async () => {
+			const resultList : Result = await getFutureIncomes('someuserid', 1, 4);
+			expect(moment(resultList.data[0].nextDueDate).isSameOrAfter(moment().add(3, 'months'))).to.be.true;
+		})
 	})
 });

@@ -6,13 +6,20 @@ import { fetchCollection } from '../util/Firestore';
 export const getFutureIncomes =
 	async (userId: string, months?: number, skip?: number): Promise<Result> => {
 	console.log('getting future transactions for ', userId);
-	const incomes = await fetchCollection(`transactions/${userId}/incomes`);
+	const incomes: Result = await fetchCollection(`transactions/${userId}/incomes`);
 	if(!incomes.success) return incomes;
-	const results : Array<Transaction> = [];
+	let results : Array<Transaction> = [];
 	incomes.data.forEach(income => {
-		if(!income.isRecurring() && income.isFuture()) results.concat([income]);
-		else if(income.isRecurring()) results.concat(getFutureTransactions(income, months, skip))
+		console.log('iterating through fetched results');
+		if(!income.isRecurring() && income.isFuture()) {
+			console.log('income is non recurring and is in the future, adding single entity');
+			results = results.concat([income])
+		} else if(income.isRecurring()) {
+			console.log('income is recurring, generating multiple entities');
+			results = results.concat(getFutureTransactions(income, months, skip))
+		}
 	});
+	console.log('entity generation complete, generated', results.length, 'entries');
 	incomes.data = results;
 	return incomes;
 };

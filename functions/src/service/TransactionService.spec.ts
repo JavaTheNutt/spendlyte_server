@@ -47,7 +47,27 @@ describe('TransactionService', () => {
 			const transactionList = getFutureTransactions(transaction, 1, 3);
 			expect(moment(transactionList[0].nextDueDate)
 				.isSameOrAfter(moment().add(9, 'weeks'))).to.be.true;
-		})
+		});
+		it('should return sporadic transactions wrapped in an array when they are in the future', () => {
+			const transaction = new Transaction('something', 'wages', 2300, 'Sporadic', moment().add(1, 'day').format('YYYY-MM-DD'));
+			const transactionList = getFutureTransactions(transaction);
+			expect(transactionList).to.eql([transaction]);
+		});
+		it('should return an empty array when sporadic transactions are not in the future', () => {
+			const transaction = new Transaction('something', 'wages', 2300, 'Sporadic', moment().subtract(1, 'day').format('YYYY-MM-DD'));
+			const transactionList = getFutureTransactions(transaction);
+			expect(transactionList).to.eql([]);
+		});
+		it('should return once transactions wrapped in an array', () => {
+			const transaction = new Transaction('something', 'wages', 2300, 'Once', moment().add(1, 'day').format('YYYY-MM-DD'));
+			const transactionList = getFutureTransactions(transaction);
+			expect(transactionList).to.eql([transaction]);
+		});
+		it('should return an empty array when once transactions are not in the future', () => {
+			const transaction = new Transaction('something', 'wages', 2300, 'Once', moment().subtract(1, 'day').format('YYYY-MM-DD'));
+			const transactionList = getFutureTransactions(transaction);
+			expect(transactionList).to.eql([]);
+		});
 	});
 	describe('getNextDate', ()=>{
 		it('should return the date incremented by one month for monthly transactions', () => {
@@ -65,5 +85,8 @@ describe('TransactionService', () => {
 			const result = getNextDate(now, 'Daily');
 			expect(result).to.equal(moment().add(1, 'day').format('YYYY-MM-DD'))
 		});
+	});
+	describe('getFutureIncomes', ()=>{
+		it('should fetch a generate a list of transactions based on the results of the db query')
 	})
 });

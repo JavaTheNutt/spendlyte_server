@@ -1,8 +1,27 @@
 import * as moment from 'moment';
 import Transaction from "../models/Transaction";
+import Result from "../dto/Result";
+import { fetchCollection } from '../util/Firestore';
 
-export const getFutureTransactions = (transaction: Transaction, months: number = 3, skip: number = 0): Array<Transaction> =>{
+export const getFutureIncomes =
+	async (userId: string, months?: number, skip?: number): Promise<Result> => {
+	console.log('getting future transactions for ', userId);
+	const incomes = await fetchCollection(`transactions/${userId}/incomes`);
+	if(!incomes.success) return incomes;
+	const results : Array<Transaction> = [];
+	incomes.data.forEach(income => {
+		if(!income.isRecurring() && income.isFuture()) results.concat([income]);
+		else if(income.isRecurring()) results.concat(getFutureTransactions(income, months, skip))
+	});
+	incomes.data = results;
+	return incomes;
+};
+
+export const getFutureTransactions =
+	(transaction: Transaction, months: number = 3, skip: number = 0): Array<Transaction>  =>{
 	console.log('attempting to get', months, 'months worth of transactions skipping', skip);
+	if(!transaction.isRecurring() && transaction.isFuture()) return [transaction];
+	if(!transaction.isRecurring() && !transaction.isFuture()) return [];
 	let baseTransaction = getNextTransaction(transaction);
 	if(skip > 0) baseTransaction.nextDueDate = incrementDate(baseTransaction.nextDueDate, baseTransaction.frequency, getIterations(skip, baseTransaction.frequency));
 	const results = [baseTransaction];
@@ -13,7 +32,8 @@ export const getFutureTransactions = (transaction: Transaction, months: number =
 	}
 	return results;
 };
-const getIterations = (months: number, frequency: string): number => {
+const getIterations =
+	(months: number, frequency: string): number => {
 	const INTERVALS = {
 		Monthly: 1,
 		Weekly: 4,
@@ -21,7 +41,8 @@ const getIterations = (months: number, frequency: string): number => {
 	};
 	return months * INTERVALS[frequency];
 };
-const getNextTransaction = (transaction: Transaction): Transaction => {
+const getNextTransaction =
+	(transaction: Transaction): Transaction => {
 	if(transaction.isFuture()) return transaction;
 	let prevTransaction: Transaction = transaction;
 	while(true){

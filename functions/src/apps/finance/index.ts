@@ -35,11 +35,8 @@ export default class Server {
 	}
 	public middleware () {
 		console.log('configuring middleware');
-		if(process.env.NODE_ENV !== 'development') {
-			console.log('production mode detected, adding auth middleware');
-			this.app.use(validateFirebaseIdToken);
-		}
+		console.log('production mode detected, adding auth middleware');
+		this.app.use(validateFirebaseIdToken);
 	}
 }
-
 

@@ -9,7 +9,6 @@ export const validateFirebaseIdToken = async (req, res, next): Promise<any> => {
 		res.status(403).send('Unauthorized');
 		return null;
 	}
-
 	let idToken;
 	if (req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
 		console.log('Found "Authorization" header');

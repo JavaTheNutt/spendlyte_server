@@ -10,7 +10,8 @@
     "deploy": "firebase deploy --only functions",
     "logs": "firebase functions:log",
     "test": "mocha -r ts-node/register src/**/*.spec.ts",
-    "dev": "nodemon --watch lib --exec npm run serve:no-build"
+    "dev": "nodemon --watch lib --exec npm run serve:no-build",
+    "compile:watch": "tsc -w"
   },
   "main": "lib/index.js",
   "dependencies": {

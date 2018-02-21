@@ -2,6 +2,7 @@ import * as moment from 'moment';
 import Transaction from "../models/Transaction";
 import Result from "../dto/Result";
 import { fetchCollection } from '../util/Firestore';
+import { getFetchPeriod, fallsInFetchPeriod } from '../util/DateUtils';
 
 export const getFutureIncomes =
 	async (userId: string, months?: number, skip?: number): Promise<Result> => await fetchFutureTransactions(userId, 'Income', months, skip);
@@ -13,10 +14,11 @@ export const fetchFutureTransactions = async(userId: string, type: 'Income' | 'E
 	if(!incomes.success) return incomes;
 	console.log('result of fetching incomes:', incomes);
 	let results : Array<Transaction> = [];
+	const dateBounds = getFetchPeriod(months, skip);
 	incomes.data.forEach(income => {
 		console.log('iterating through fetched results');
 		const newIncome: Transaction = mapTransaction(income, type !== 'all' ? type : income.type);
-		if(!newIncome.isRecurring() && newIncome.isFuture()) {
+		if(!newIncome.isRecurring() && newIncome.isFuture() && fallsInFetchPeriod(dateBounds, newIncome.nextDueDate)) {
 			console.log('income is non recurring and is in the future, adding single entity');
 			results = results.concat([newIncome])
 		} else if(newIncome.isRecurring()) {

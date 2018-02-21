@@ -114,7 +114,7 @@ describe('TransactionService', () => {
 		});
 		it('should respect the skip parameter', async () => {
 			const resultList : Result = await getFutureIncomes('someuserid', 1, 4);
-			expect(moment(resultList.data[0].nextDueDate).isSameOrAfter(moment().add(3, 'months'))).to.be.true;
+			expect(moment(resultList.data[0].due).isSameOrAfter(moment().add(3, 'months'))).to.be.true;
 		})
 	})
 });

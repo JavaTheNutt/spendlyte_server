@@ -35,7 +35,7 @@ describe('Transaction.ts', () => {
 		it('should return the transaction in mapped format', () => {
 			const transaction = new Transaction('someid', 'wages', 2333, 'Monthly', '2018-09-09', 'Income');
 			const mappedTransaction = transaction.mapForClient();
-			expect(mappedTransaction).to.eql({id: 'someid', title: 'wages', amount: 2333, frequency: 'Monthly', due: '2018-09-09', type: 'Income'})
+			expect(mappedTransaction).to.eql({id: 'someid', title: 'Wages', amount: 2333, frequency: 'Monthly', due: '2018-09-09', type: 'Income'})
 		})
 	});
 	describe('isRecurring', () => {

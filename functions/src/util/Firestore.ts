@@ -1,6 +1,6 @@
 import { firestore } from 'firebase-admin';
 import Result from "../dto/Result";
-import {QuerySnapshot} from '@google-cloud/firestore';
+import {QuerySnapshot, CollectionReference} from '@google-cloud/firestore';
 
 export const fetchCollection = async (path: string): Promise<Result> => {
 	console.log('attempting to get collection from path', path);
@@ -18,6 +18,11 @@ export const fetchCollection = async (path: string): Promise<Result> => {
 		res.error = error;
 		return res;
 	}
+};
+
+const fetchCollectionReference = (path:string): CollectionReference => {
+	console.log('returning reference at path', path);
+	return firestore().collection(path);
 };
 
 const mapSnapshot = (snapshot: QuerySnapshot) : Array<Object> => {

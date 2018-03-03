@@ -59,5 +59,5 @@ describe('Transaction.ts', () => {
 			const transaction = new Transaction('someid', 'wages', 2333, 'Sporadic', '2018-09-09');
 			expect(transaction.isRecurring()).to.be.false;
 		});
-	})
+	});
 });

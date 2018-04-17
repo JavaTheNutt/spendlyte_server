@@ -2,8 +2,6 @@ import * as express from 'express';
 import * as cookieParser from 'cookie-parser';
 import * as cors from 'cors';
 import routes from './routes';
-import * as admin from 'firebase-admin';
-import * as functions from 'firebase-functions';
 import {validateFirebaseIdToken} from "../../middleware/Auth";
 
 export default class Server {

@@ -19,7 +19,7 @@ describe('Transaction.ts', () => {
 			expect(transaction.id).to.equal('someid');
 		});
 	});
-	describe('isFuture', ()=>{
+	describe('isFuture', () => {
 		it('should return true when the due date is in the future', () => {
 			const date = moment().add(10, 'days').format('YYYY-MM-DD');
 			const transaction = new Transaction('someid', 'wages', 2333, 'Monthly', date);
@@ -35,7 +35,14 @@ describe('Transaction.ts', () => {
 		it('should return the transaction in mapped format', () => {
 			const transaction = new Transaction('someid', 'wages', 2333, 'Monthly', '2018-09-09', 'Income');
 			const mappedTransaction = transaction.mapForClient();
-			expect(mappedTransaction).to.eql({id: 'someid', title: 'Wages', amount: 2333, frequency: 'Monthly', due: '2018-09-09', type: 'Income'})
+			expect(mappedTransaction).to.eql({
+				id: 'someid',
+				title: 'Wages',
+				amount: 2333,
+				frequency: 'Monthly',
+				due: '2018-09-09',
+				type: 'Income'
+			})
 		})
 	});
 	describe('isRecurring', () => {

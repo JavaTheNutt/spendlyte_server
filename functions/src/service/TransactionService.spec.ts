@@ -1,7 +1,13 @@
 import * as chai from 'chai';
 import * as sinon from 'sinon';
 import * as sinonChai from 'sinon-chai';
-import { generateFutureTransactions, getNextDate, getFutureIncomes } from './TransactionService';
+import {
+	generateFutureTransactions,
+	getNextDate,
+	getFutureIncomes,
+	formatInitialTransactionData,
+	getOneMonthsDates
+} from './TransactionService';
 import * as FirebaseUtil from '../util/Firestore';
 import 'mocha';
 import * as moment from 'moment';
@@ -76,7 +82,7 @@ describe('TransactionService', () => {
 			expect(transactionList).to.eql([]);
 		});
 	});
-	describe('getNextDate', ()=>{
+	describe('getNextDate', () => {
 		it('should return the date incremented by one month for monthly transactions', () => {
 			const now: string = moment().format('YYYY-MM-DD');
 			const result = getNextDate(now, 'Monthly');
@@ -93,7 +99,7 @@ describe('TransactionService', () => {
 			expect(result).to.equal(moment().add(1, 'day').format('YYYY-MM-DD'))
 		});
 	});
-	describe('getFutureIncomes', ()=>{
+	describe('getFutureIncomes', () => {
 		let fetchCollectionStub;
 		beforeEach(() => {
 			const transaction = new Transaction('someid', 'wages', 4500, 'Monthly', moment().add(1, 'days').format('YYYY-MM-DD'));
@@ -105,16 +111,75 @@ describe('TransactionService', () => {
 			fetchCollectionStub.resolves(result);
 		});
 		it('should generate a list of transactions based on the results of the db query', async () => {
-			const resultList : Result = await getFutureIncomes('someuserid');
+			const resultList: Result = await getFutureIncomes('someuserid');
 			expect(resultList.data.length).to.equal(15);
 		});
 		it('should respect the number parameter', async () => {
-			const resultList : Result = await getFutureIncomes('someuserid', 1);
+			const resultList: Result = await getFutureIncomes('someuserid', 1);
 			expect(resultList.data.length).to.equal(5);
 		});
 		it('should respect the skip parameter', async () => {
-			const resultList : Result = await getFutureIncomes('someuserid', 1, 4);
+			const resultList: Result = await getFutureIncomes('someuserid', 1, 4);
 			expect(moment(resultList.data[0].due).isSameOrAfter(moment().add(3, 'months'))).to.be.true;
 		})
+	});
+	describe('formatInitialTransactionData', () => {
+		let onceTransaction, weeklyTransaction, monthlyTransaction;
+		beforeEach(() => {
+			onceTransaction = new Transaction('someoncetransaction', 'clothes', 223.34, 'Once', moment().add(3, 'days').format('YYYY-MM-DD'), 'Expenditure')
+			weeklyTransaction = new Transaction('someoncetransaction', 'clothes', 223.34, 'Weekly', moment().add(3, 'days').format('YYYY-MM-DD'), 'Expenditure')
+			monthlyTransaction = new Transaction('someoncetransaction', 'clothes', 223.34, 'Monthly', moment().add(3, 'days').format('YYYY-MM-DD'), 'Expenditure')
+		});
+		it('should return the single date in an array for future dates that are marked sporadic or once', () => {
+			const result = formatInitialTransactionData(onceTransaction);
+			expect(result).to.have.property('dates');
+			expect(result.dates).to.be.an('Array');
+			expect(result.dates).to.have.lengthOf(1);
+			expect(result.dates[0]).to.equal(onceTransaction.nextDueDate);
+		});
+		it('should return an array with one months worth of future dates');
+		it('should set the marked date as the due date for transactions that are in the future');
+		it('should return all of the dates for recurring transactions that fall due in the next 6 months by default');
+		it('should return monthly totals for the transaction');
+		it('should return quarterly totals for the transaction');
+		it('should return bi-yearly totals for the transaction');
+		it('should return yearly totals for the transaction');
+	});
+	describe('getOneMonthsDates', () => {
+		it('should return monthly, sporadic and once dates wrappped in an array', () => {
+			const today = moment().format('YYYY-MM-DD');
+			let result = getOneMonthsDates(today, 'Once');
+			expect(result).to.eql([today]);
+			result = getOneMonthsDates(today, 'Sporadic');
+			expect(result).to.eql([today]);
+			result = getOneMonthsDates(today, 'Monthly');
+			expect(result).to.eql([today]);
+		});
+		it('should return 4 dates for weekly transactions', () => {
+			const today = moment();
+			let result = getOneMonthsDates(today.format('YYYY-MM-DD'), 'Weekly');
+			expect(result.length).to.eql(4);
+			const lastDate = moment(result[result.length - 1]);
+			const closingDate01 = today.clone();
+			closingDate01.add(2, 'weeks');
+			closingDate01.add(5, 'days');
+			const closingDate02 = today.clone();
+			closingDate02.add(5, 'weeks');
+			const isWithinReason = lastDate.isSameOrAfter(closingDate01) && lastDate.isSameOrBefore(closingDate02);
+			expect(isWithinReason).to.be.true;
+		});
+		it('should return 30 dates for daily transactions', () => {
+			const today = moment();
+			let result = getOneMonthsDates(today.format('YYYY-MM-DD'), 'Daily');
+			expect(result.length).to.eql(30);
+			const lastDate = moment(result[result.length - 1]);
+			const closingDate01 = today.clone();
+			closingDate01.add(2, 'weeks');
+			closingDate01.add(5, 'days');
+			const closingDate02 = today.clone();
+			closingDate02.add(5, 'weeks');
+			const isWithinReason = lastDate.isSameOrAfter(closingDate01) && lastDate.isSameOrBefore(closingDate02);
+			expect(isWithinReason).to.be.true;
+		});
 	})
 });

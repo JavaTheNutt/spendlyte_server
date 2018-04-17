@@ -1,5 +1,5 @@
 import * as moment from 'moment';
-import { titleCaseString } from "../util/String";
+import {titleCaseString} from "../util/String";
 
 export default class Transaction {
 	private _id: string;
@@ -73,13 +73,22 @@ export default class Transaction {
 		return date.isSameOrAfter(moment());
 	}
 
-	public clone(): Transaction{
+	public clone(): Transaction {
 		return new Transaction(this.id, this.title, this.amount, this.frequency, this.nextDueDate, this.type)
 	}
-	public mapForClient(): {id: string, title: string, amount: number, frequency: string, due: string, type: string} {
-		return {id: this.id, title: titleCaseString(this.title), amount: this.amount, frequency: titleCaseString(this.frequency), due: this.nextDueDate, type: this.type}
+
+	public mapForClient(): { id: string, title: string, amount: number, frequency: string, due: string, type: string } {
+		return {
+			id: this.id,
+			title: titleCaseString(this.title),
+			amount: this.amount,
+			frequency: titleCaseString(this.frequency),
+			due: this.nextDueDate,
+			type: this.type
+		}
 	}
-	public isRecurring (): boolean {
+
+	public isRecurring(): boolean {
 		return this.frequency === 'Daily' || this.frequency === 'Weekly' || this.frequency === 'Monthly';
 	}
 }

@@ -3,7 +3,7 @@ import * as sinon from 'sinon';
 import * as sinonChai from 'sinon-chai';
 import 'mocha';
 
-import { getSkipFromMonthNum, getFetchPeriod, fallsInFetchPeriod } from "./DateUtils";
+import {getSkipFromMonthNum, getFetchPeriod, fallsInFetchPeriod} from "./DateUtils";
 import moment = require("moment");
 
 chai.use(sinonChai);
@@ -12,7 +12,7 @@ const sandbox = sinon.sandbox.create();
 
 describe('DateUtils.ts', () => {
 	afterEach(() => sandbox.restore());
-	describe('getSkipFromMonthNum', ()=>{
+	describe('getSkipFromMonthNum', () => {
 		it('should return the number of months between the current month and the selected month', () => {
 			const futureMonth = moment().add(3, 'months');
 			expect(getSkipFromMonthNum(+futureMonth.format('M'))).to.equal(3);

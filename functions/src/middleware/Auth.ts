@@ -1,4 +1,5 @@
 import * as admin from 'firebase-admin';
+
 export const validateFirebaseIdToken = async (req, res, next): Promise<any> => {
 	if ((!req.headers.authorization || !req.headers.authorization.startsWith('Bearer ')) &&
 		!req.cookies.__session) {

@@ -45,7 +45,7 @@ const fetchCollectionReference = (path: string): CollectionReference => {
 	return firestore().collection(path);
 };
 
-const mapSnapshot = (snapshot: QuerySnapshot): Array<Object> => {
+export const mapSnapshot = (snapshot: QuerySnapshot): Array<Object> => {
 	const results = [];
 	snapshot.forEach((doc: firestore.DocumentSnapshot) => {
 		results.push(Object.assign({id: doc.id}, doc.data()))

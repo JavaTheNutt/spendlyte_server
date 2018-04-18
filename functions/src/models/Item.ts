@@ -86,14 +86,26 @@ export default class Item {
 			title: this.title,
 			amount: this.amount,
 			tags: this.tags,
-			dates: this.dates.formatForSaving()
+			dates: this.dates.formatForSaving(),
+			isIncome: this._direction > 0
+		}
+	}
+
+	formatForDelivery(amount: number = 0, verbose: boolean = false){
+		return {
+			title: this.title,
+			amount: this.amount,
+			tags: this.tags,
+			dates: this.dates.formatForDelivery(amount, verbose),
+			isIncome: this._direction > 0,
+			totalForDates: this.getAmountForDates()
 		}
 	}
 }
 
 const createDateManagement = (dateDetails: dateLayout): DateManagement => {
 	if(!dateDetails.isRecurring) return new DateManagement(false, dateDetails.dates || []);
-	if(dateDetails.frequency === 'monthly') return new MonthlyDateManagement(dateDetails.dates, dateDetails.freq01, dateDetails.freq02, getMonthlyType(dateDetails.type), dateDetails.interval);
+	if(dateDetails.frequency.toLowerCase() === 'monthly') return new MonthlyDateManagement(dateDetails.dates, dateDetails.freq01, dateDetails.freq02, getMonthlyType(dateDetails.type), dateDetails.interval);
 	return new RecurringDateManagement(dateDetails.dates, getRecurringType(dateDetails.frequency), dateDetails.interval)
 };
 
@@ -109,7 +121,7 @@ const getMonthlyType = (type:string) => {
 };
 
 const getRecurringType = (type: string) => {
-	switch(type){
+	switch(type.toLowerCase()){
 		case 'weekly':
 			return Frequency.weekly;
 		case 'monthly':

@@ -65,5 +65,13 @@ export default class RecurringDateManagement extends DateManagement {
 			interval: this.interval
 		});
 	}
+	formatForDelivery(amount: number = 0, verbose: boolean = false){
+		this.getNextDates(amount);
+		const superBase = super.formatForDelivery(amount, verbose);
+		return verbose? Object.assign(superBase, {
+			interval: this.interval,
+			frequency: this.frequency
+		}): superBase;
+	}
 }
 

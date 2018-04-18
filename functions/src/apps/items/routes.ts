@@ -1,6 +1,6 @@
 import {Application, Response} from "express";
 import {IRequest} from "../../../types/c_express";
-import { saveNewItem } from "../../service/ItemService";
+import { saveNewItem, fetchForDelivery } from "../../service/ItemService";
 import Result from "../../dto/Result";
 import Item from "../../models/Item";
 
@@ -15,6 +15,16 @@ export default (app: Application) => {
 			res.status(500).send({msg: 'an error has occurred while fetching tags'})
 		});
 	});
+	app.get('/', (req: IRequest, res: Response) => {
+		console.log('request recieved to fetch all items for user', req.user.uid, 'with params', req.query);
+		fetchForDelivery(req.user.uid, req.query.amount, req.query.verbose).then(result => {
+			console.log('data fetched successfully');
+			res.status(result.status || result.success ? 200 : 500).send(result.data);
+		}).catch(err => {
+			console.log('an error has occurred', err);
+			res.status(500).send({msg: 'an error has occurred while fetching items'})
+		})
+	})
 }
 
 const createItemIn = (details): Item => {
@@ -26,6 +36,6 @@ const createItemIn = (details): Item => {
 		interval: details.interval,
 		freq01: details.freq01,
 		freq02: details.freq02,
-		type: details.type
+		type: details.type,
 	}, details.tags)
 };

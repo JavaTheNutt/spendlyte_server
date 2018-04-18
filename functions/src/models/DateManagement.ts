@@ -152,6 +152,19 @@ export default class DateManagement {
 			dates: this.getUserEnteredDates()
 		}
 	}
+	formatForDelivery (amount: number = 0, verbose: boolean = false) {
+		const base = {
+			dates: this._dates
+		};
+		return verbose ? Object.assign(base, {
+			userEntered: this.getUserEnteredDates(),
+			future: this.getFuture(),
+			past: this.getPast(),
+			today: this.occursToday,
+			thisWeek: this.weeklyOccurrenceDates,
+			thisMonth: this.monthlyOccurrenceDates
+		}): base;
+	}
 	getFuture () {
 		return this._dates.filter(date => (isToday(date) || isAfter(date, new Date())))
 	}

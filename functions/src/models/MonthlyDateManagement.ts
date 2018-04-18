@@ -87,6 +87,14 @@ export default class MonthlyDateManagement extends RecurringDateManagement {
 		}
 		return data;
 	}
+	formatForDelivery(amount: number = 0, verbose:boolean = false){
+		const data = super.formatForDelivery(amount, verbose);
+		return verbose ? Object.assign(data, {
+			monthlyFrequencyType: this._type,
+			freq01: this._freq01,
+			freq02: this._freq02
+		}): data;
+	}
 }
 const setDefaultFrequencyValues = (type: MonthlyFrequencyType) => {
 	switch (type) {
@@ -111,10 +119,11 @@ const getNextInvDate = (date: string, inv: string = 'start', interval = 1): stri
 			return format(startOfMonth(newDate), 'YYYY-MM-DD');
 	}
 };
-const getNextDimDate = (date: string, monthDate: number, interval): string => format(addMonths(date, interval).setDate(monthDate))
+const getNextDimDate = (date: string, monthDate: number, interval): string => format(addMonths(date, interval).setDate(monthDate));
 
 const getNextWdimDate = (date: string, weekDay: string, monthPlace: string, interval: number = 1): string => {
 	let weekPlace = 0;
+	console.log('attempting to create wdim date record for every ', monthPlace, weekDay, 'of the month');
 	console.log('weekday number', weekDayMappings[weekDay]);
 	const nextDate = setDay(startOfMonth(addMonths(date, interval)), weekDayMappings[weekDay]);
 	console.log('nextDate', nextDate);

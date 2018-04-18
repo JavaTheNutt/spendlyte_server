@@ -2,6 +2,7 @@ import RecurringDateManagement, {Frequency} from './RecurringDateManagement';
 import * as format from 'date-fns/format';
 import * as subDays from 'date-fns/sub_days';
 import * as addDays from 'date-fns/add_days';
+import * as addMonths from 'date-fns/add_months';
 import * as isAfter from 'date-fns/is_after';
 import * as getDay from 'date-fns/get_day';
 import * as getDate from 'date-fns/get_date';
@@ -56,4 +57,16 @@ describe('RecurringDateManagement', () => {
 			});
 		});
 	});
+	describe('getNextDatesForPeriod', () => {
+		it('should return an appropriate number of records', () => {
+			const startDate = format(subDays(new Date(), 3), 'YYYY-MM-DD');
+			const date = new RecurringDateManagement(
+				[startDate],
+				Frequency.monthly
+			);
+			const newDates = date.getNextDatesForMonths(6);
+			expect(newDates.length).to.equal(7);
+			expect(isAfter(date.getLatestDate(), addMonths(startDate, 5))).to.be.true;
+		})
+	})
 });

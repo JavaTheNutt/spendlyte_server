@@ -152,7 +152,9 @@ export default class DateManagement {
 			dates: this.getUserEnteredDates()
 		}
 	}
-	formatForDelivery (amount: number = 0, verbose: boolean = false) {
+	formatForDelivery (amount: number = 0, verbose: boolean = false, months: boolean = false) {
+		console.log('formatting for delivery in base date management model');
+		console.log('generating months?', months);
 		const base = {
 			dates: this._dates
 		};
@@ -172,6 +174,14 @@ export default class DateManagement {
 		return this._dates.filter(date => (isToday(date) || isBefore(date, new Date())));
 	}
 
+	resetGeneratedDates():void {
+		this._dates = this.getUserEnteredDates();
+	}
+
+	getNextDatesForMonths(amount: number = 1, refresh: boolean = false): Array<string>{
+		console.log('generating dates in base date management model, returning base dates');
+		return this._dates
+	}
 }
 const anyOccursToday = (dates: Array<string>): boolean => dates.indexOf(format(new Date(), 'YYYY-MM-DD')) !== -1;
 

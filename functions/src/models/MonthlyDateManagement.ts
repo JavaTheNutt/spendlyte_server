@@ -44,7 +44,8 @@ export default class MonthlyDateManagement extends RecurringDateManagement {
 		}
 	}
 
-	getNextDates(amount: number = 1): Array<string> {
+	getNextDates(amount: number = 1, refresh:boolean = true): Array<string> {
+		if(refresh) super.resetGeneratedDates();
 		let latestDate = this.getLatestDate();
 		switch (this._type) {
 			case MonthlyFrequencyType.INTERVAL:
@@ -87,8 +88,9 @@ export default class MonthlyDateManagement extends RecurringDateManagement {
 		}
 		return data;
 	}
-	formatForDelivery(amount: number = 0, verbose:boolean = false){
-		const data = super.formatForDelivery(amount, verbose);
+	formatForDelivery(amount: number = 0, verbose:boolean = false, months: boolean = false){
+		console.log('format for delivery called in a monthly date instance');
+		const data = super.formatForDelivery(amount, verbose, months);
 		return verbose ? Object.assign(data, {
 			monthlyFrequencyType: this._type,
 			freq01: this._freq01,

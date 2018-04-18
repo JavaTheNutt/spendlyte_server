@@ -18,6 +18,9 @@ export default class Item {
 	private _amount: number;
 	readonly _tags: Array<string>;
 	readonly _dates: DateManagement;
+	readonly _dailyTotal: number;
+	readonly _weeklyTotal: number;
+	readonly _monthlyTotal: number;
 
 	constructor(
 		title: string,
@@ -91,15 +94,19 @@ export default class Item {
 		}
 	}
 
-	formatForDelivery(amount: number = 0, verbose: boolean = false){
-		return {
+	formatForDelivery(amount: number = 0, verbose: boolean = false, months: boolean = false){
+		console.log('formatting for delivery in Item model, fetching months?', true);
+		const base = {
 			title: this.title,
 			amount: this.amount,
 			tags: this.tags,
-			dates: this.dates.formatForDelivery(amount, verbose),
+			dates: this.dates.formatForDelivery(amount, verbose, months),
 			isIncome: this._direction > 0,
 			totalForDates: this.getAmountForDates()
-		}
+		};
+		return verbose ? Object.assign(base, {
+			totalForDates: this.getAmountForDates()
+		}): base;
 	}
 }
 

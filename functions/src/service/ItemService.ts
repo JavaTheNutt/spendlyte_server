@@ -19,10 +19,11 @@ export const saveNewItem = async (userId:string, item: Item): Promise<Result> =>
 		return result;
 	}
 };
-export const fetchForDelivery = async (userId: string, amount: number = 0, verbose:boolean = false) => {
+export const fetchForDelivery = async (userId: string, amount: number = 0, verbose:boolean = false, months?: boolean) => {
+	console.log('fetching for months in fetch function?', months);
 	const res = await fetchItems(userId);
 	if(!res.success) return res;
-	res.data = mapForDelivery(res.data, amount, verbose);
+	res.data = mapForDelivery(res.data, amount, verbose, months);
 	return res;
 };
 export const fetchItems = async (userId:string): Promise<Result> => {
@@ -30,9 +31,9 @@ export const fetchItems = async (userId:string): Promise<Result> => {
 	try{
 		const res = await firestore().collection(`items/${userId}/records`).get();
 		const objectMappedResults = mapSnapshot(res);
-		console.log('result mapped as object',objectMappedResults);
+		//console.log('result mapped as object',objectMappedResults);
 		const itemMappedResults = objectMappedResults.map(item => mapItem(item));
-		console.log('result mapped as item',itemMappedResults);
+		//console.log('result mapped as item',itemMappedResults);
 		result.success = true;
 		result.status = 302;
 		result.data = itemMappedResults;
@@ -47,7 +48,7 @@ export const fetchItems = async (userId:string): Promise<Result> => {
 };
 
 export const mapItem = (itemDetails:any):Item => {
-	console.log('attempting to create item from details', itemDetails);
+	//console.log('attempting to create item from details', itemDetails);
 	const dateDetails = {
 		isRecurring: !!itemDetails.dates.frequency,
 		dates: itemDetails.dates.dates,
@@ -60,7 +61,10 @@ export const mapItem = (itemDetails:any):Item => {
 	return new Item(itemDetails.title, itemDetails.amount, itemDetails.isIncome ? 1 : -1, dateDetails, itemDetails.tags, itemDetails.id)
 };
 
-export const mapForDelivery = (items: Array<Item>, amount:number = 0, verbose:boolean=false) => items.map(item => item.formatForDelivery(amount, verbose));
+export const mapForDelivery = (items: Array<Item>, amount:number = 0, verbose:boolean=false, months?:boolean) => {
+	console.log('generating months in map function?', true);
+	return items.map(item => item.formatForDelivery(amount, verbose, months));
+};
 
 
 

@@ -68,5 +68,15 @@ describe('RecurringDateManagement', () => {
 			expect(newDates.length).to.equal(7);
 			expect(isAfter(date.getLatestDate(), addMonths(startDate, 5))).to.be.true;
 		})
-	})
+	});
+	describe('getMonthlySummary', () => {
+		it('should fetch a summary', () => {
+			const date = new RecurringDateManagement([format(new Date(), 'YYYY-MM-DD')], Frequency.daily);
+			const summary = date.getMonthSummary();
+			console.log(summary);
+			expect(summary.today.length).to.equal(1);
+			expect(summary.thisWeek.length).to.equal(6);
+			expect(summary.thisMonth.length).to.equal(22);
+		});
+	});
 });

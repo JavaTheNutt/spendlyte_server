@@ -1,6 +1,7 @@
 import DateManagement from "./DateManagement";
 import MonthlyDateManagement, {MonthlyFrequencyType} from "./MonthlyDateManagement";
 import RecurringDateManagement, {Frequency} from "./RecurringDateManagement";
+import * as isBefore from 'date-fns/is_before';
 
 type dateLayout = {
 	isRecurring: boolean;
@@ -83,7 +84,6 @@ export default class Item {
 	getAmountForUserEnteredDates() {
 		return this._amount * this._dates.getUserEnteredDates().length;
 	}
-
 	formatForSaving() {
 		return {
 			title: this.title,
@@ -107,6 +107,39 @@ export default class Item {
 		return verbose ? Object.assign(base, {
 			totalForDates: this.getAmountForDates()
 		}): base;
+	}
+	generateFianancialSummary () {
+		const summary = this._dates.getMonthSummary();
+		const todayCost = this._amount * summary.today.length;
+		const thisWeekCost = this._amount * summary.thisWeek.length;
+		const thisMonthCost = this._amount * summary.thisMonth.length;
+		return {
+			todayAmount: todayCost,
+			thisWeekAmount: thisWeekCost,
+			thisMonthAmount: thisMonthCost,
+			absoluteTotal: thisMonthCost + todayCost + thisWeekCost,
+			realTotal: (thisMonthCost + todayCost + thisWeekCost) * this._direction,
+			direction: this._direction
+		}
+	}
+	generateSummary(){
+		return {
+			title: this._title,
+			amount: this._amount,
+			dates: this._dates.getMonthSummary(),
+			finance: this.generateFianancialSummary()
+		}
+	}
+	getFinancialSummary(){
+		console.log('fetching financial summary');
+		return {
+			type: this._direction > 0 ? 'income': 'expense',
+			absoluteMonth: this._dates.getNumberOfTransactionsPerMonth() * this._amount,
+			month: (this._dates.getNumberOfTransactionsPerMonth() * this._amount)*this._direction,
+			absoluteThreeMonth: (this._dates.getNumberOfTransactionsPerMonth() * 3) * this._amount,
+			threeMonth:  ((this._dates.getNumberOfTransactionsPerMonth() * 3) * this._amount) * this._direction,
+			absoluteSixMonth: (this._dates.getNumberOfTransactionsPerMonth() * 6) * this._amount,
+		}
 	}
 }
 

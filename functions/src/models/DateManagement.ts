@@ -2,6 +2,8 @@ import * as compareDesc from "date-fns/compare_desc";
 import * as format from 'date-fns/format';
 import * as isInRange from 'date-fns/is_within_range';
 import * as addDays from 'date-fns/add_days';
+import * as addMonths from 'date-fns/add_months';
+import * as addWeeks from 'date-fns/add_weeks';
 import * as subDays from 'date-fns/sub_days';
 import * as isToday from "date-fns/is_today";
 import * as isAfter from 'date-fns/is_after';
@@ -29,6 +31,7 @@ export default class DateManagement {
 	protected _weeklyOccurrenceDatesTested: boolean;
 	protected _monthlyOccurrenceDatesTested: boolean;
 	protected _monthlyOccurrenceDates: Array<string>;
+	protected _frequency: string;
 
 	constructor(isRecurring: boolean = false, dates: Array<string> = []) {
 		this._isRecurring = isRecurring;
@@ -46,6 +49,7 @@ export default class DateManagement {
 		this._weeklyOccurrenceDatesTested = false;
 		this._monthlyOccurrenceDates = [];
 		this._monthlyOccurrenceDatesTested = false;
+		this._frequency = 'none';
 	}
 
 	get isRecurring(): boolean {
@@ -167,6 +171,56 @@ export default class DateManagement {
 			thisMonth: this.monthlyOccurrenceDates
 		}): base;
 	}
+	getTodaysDates ():Array<string> {
+		return this._dates.filter(date => isToday(date));
+	}
+	getMonthSummary (): {today:Array<string>, thisWeek:Array<string>, thisMonth:Array<string>}{
+		let monthDates = this.getWithinMonths(1);
+		const today = new Date();
+		const todayDates = monthDates.filter(date => isToday(date));
+		monthDates = monthDates.filter(date => !isToday(date));
+		const weekDates = monthDates.filter(date => isAfter(date, addDays(today, 1)) && isBefore(date, addDays(today, 7)));
+		monthDates = monthDates.filter(date => isAfter(date, addDays(today, 1)) && !isBefore(date, addDays(today, 7)));
+		return {
+			today: todayDates,
+			thisWeek: weekDates,
+			thisMonth: monthDates
+		}
+	}
+	getBefore (lastDate:string, future: boolean = false): Array<string>{
+		console.log('attempting to fetch dates before', lastDate);
+		const baseDates = future ? this.getFuture() : this._dates;
+		const filteredDates =  baseDates.filter(date => {
+			console.log('attempting to check if', date, 'is before', lastDate);
+			const res = isBefore(date, lastDate);
+			console.log('is before?', res);
+			return res;
+		});
+		console.log(filteredDates.length, 'dates found before', lastDate);
+		return filteredDates;
+	}
+	getWithinMonths(amount:number): Array<string>{
+		console.log('attempting to get dates within', amount, 'months');
+		return this.getBefore(format(addMonths(new Date(), amount), 'YYYY-MM-DD'), true)
+	}
+	getWithinMonthsCount(amount:number){
+		return this.getWithinMonths(amount).length;
+	}
+	getWithinWeeks(amount:number = 1): Array<string>{
+		return this.getBefore(format(addWeeks(new Date(), amount), 'YYYY-MM-DD'), true);
+	}
+	getWithinThreeMonths(): Array<string>{
+		return this.getWithinMonths(3)
+	}
+	getThreeMonthCount(): number {
+		return this.getWithinThreeMonths().length;
+	}
+	getWithinSixMonths(): Array<string>{
+		return this.getWithinMonths(6);
+	}
+	getSixMonthCount(): number {
+		return this.getWithinSixMonths().length;
+	}
 	getFuture () {
 		return this._dates.filter(date => (isToday(date) || isAfter(date, new Date())))
 	}
@@ -181,6 +235,18 @@ export default class DateManagement {
 	getNextDatesForMonths(amount: number = 1, refresh: boolean = false): Array<string>{
 		console.log('generating dates in base date management model, returning base dates');
 		return this._dates
+	}
+	getNumberOfTransactionsPerMonth(){
+		switch (this._frequency.toLowerCase()) {
+			case 'weekly':
+				return 4;
+			case 'monthly':
+				return 1;
+			case 'daily':
+				return 30;
+			default:
+				return 0;
+		}
 	}
 }
 const anyOccursToday = (dates: Array<string>): boolean => dates.indexOf(format(new Date(), 'YYYY-MM-DD')) !== -1;

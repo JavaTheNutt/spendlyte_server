@@ -1,6 +1,6 @@
 import {Application, Response} from "express";
 import {IRequest} from "../../../types/c_express";
-import { saveNewItem, fetchForDelivery } from "../../service/ItemService";
+import {saveNewItem, fetchForDelivery, fetchSummary} from "../../service/ItemService";
 import Result from "../../dto/Result";
 import Item from "../../models/Item";
 
@@ -26,6 +26,15 @@ export default (app: Application) => {
 		}).catch(err => {
 			console.log('an error has occurred', err);
 			res.status(500).send({msg: 'an error has occurred while fetching items'})
+		})
+	});
+	app.get('/summary', (req: IRequest, res: Response) => {
+		console.log('attempting to fetch summary stats for user', req.user.uid);
+		fetchSummary(req.user.uid, req.query.list).then(result => {
+			res.status(result.status || result.success ? 200 : 500).send(result.data[0]);
+		}).catch(err => {
+			console.log('an error has occurred', err);
+			res.status(500).send({msg: 'an error has occurred while fetching summary'})
 		})
 	})
 }

@@ -37,6 +37,11 @@ export default class RecurringDateManagement extends DateManagement {
 		this._interval = value;
 	}
 
+	getMonthSummary(): { today: Array<string>; thisWeek: Array<string>; thisMonth: Array<string> } {
+		this.getNextDatesForMonths(2, true);
+		return super.getMonthSummary();
+	}
+
 	getNextDates(amount: number = 1, refresh: boolean= false): Array<string> {
 		console.log('attempting to generate', amount, 'records');
 		if(refresh) super.resetGeneratedDates();
@@ -58,6 +63,7 @@ export default class RecurringDateManagement extends DateManagement {
 			this._dateDetails.push({date: newLastDate, userEntered: false});
 			lastDate = newLastDate;
 		}
+		console.log('date generation finished, generated', this._dates.length, 'records')
 		return this._dates;
 	}
 
@@ -90,14 +96,16 @@ export default class RecurringDateManagement extends DateManagement {
 	}
 }
 
-const getNumberTransactionsPerMonth = (frequency: string):number => {
+const getNumberTransactionsPerMonth = (frequency: string = 'none'):number => {
 	switch (frequency.toLowerCase()) {
 		case 'weekly':
 			return 4;
 		case 'monthly':
 			return 1;
-		default:
+		case 'daily':
 			return 30;
+		default:
+			return 0;
 	}
 };
 

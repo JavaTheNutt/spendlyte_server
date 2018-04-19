@@ -201,6 +201,29 @@ describe('DateManagement', () => {
 			const dates = new DateManagement(false, futureDates.concat(pastDates));
 			expect(dates.getPast()).to.eql(pastDates)
 		});
-
+	});
+	describe('getMonthSummary', () => {
+		it('should return a monthly summary', () => {
+			const today = new Date();
+			const dates = [
+				format(today, 'YYYY-MM-DD'),
+				format(today, 'YYYY-MM-DD'),
+				format(addDay(today, 1), 'YYYY-MM-DD'),
+				format(addDay(today, 2), 'YYYY-MM-DD'),
+				format(addDay(today, 3), 'YYYY-MM-DD'),
+				format(addDay(today, 7), 'YYYY-MM-DD'),
+				format(addDay(today, 10), 'YYYY-MM-DD'),
+				format(addDay(today, 17), 'YYYY-MM-DD'),
+				format(addDay(today, 25), 'YYYY-MM-DD'),
+				format(addDay(today, 30), 'YYYY-MM-DD'),
+				format(addDay(today, 31), 'YYYY-MM-DD')
+			];
+			const date = new DateManagement(false, dates);
+			const summary = date.getMonthSummary();
+			console.log(summary);
+			expect(summary.today.length).to.equal(2);
+			expect(summary.thisWeek.length).to.equal(3);
+			expect(summary.thisMonth.length).to.equal(3);
+		});
 	})
 });

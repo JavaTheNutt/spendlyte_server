@@ -11,19 +11,11 @@ export default (app: Application) => {
 		const promises = [saveNewItem(req.user.uid, createItemIn(req.body.item)), addNewTags(req.user.uid, req.body.item.tags)];
 		Promise.all(promises).then(result => {
 			console.log('result', result);
-			const allPassed = result[0].success && result[1].success;
-			res.status(allPassed ? 200 : 500).send(result[0].data[0]);
+			res.status(result[0].success ? 200 : 500).send(result[0].data[0]);
 		}).catch(err => {
 			console.log('an error has occurred', err);
 			res.status(500).send({msg: 'an error has occurred while fetching tags'})
 		});
-		/*saveNewItem(req.user.uid, createItemIn(req.body.item)).then((result: Result) => {
-			console.log('result', result);
-			res.status(result.status || result.success ? 200 : 500).send(result.data[0]);
-		}).catch(err => {
-			console.log('an error has occurred', err);
-			res.status(500).send({msg: 'an error has occurred while fetching tags'})
-		});*/
 	});
 	app.get('/', (req: IRequest, res: Response) => {
 		console.log('request recieved to fetch all items for user', req.user.uid, 'with params', req.query);

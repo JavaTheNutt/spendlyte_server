@@ -14,11 +14,13 @@ export const saveNewItem = async (userId:string, item: Item): Promise<Result> =>
 		const pastList  = Object.assign([], item.pastRecords.records);
 		const res = await (await firestore().collection(`items/${userId}/records`).add(item.formatForSaving())).get();
 		await addPastRecords(userId, res.id, pastList);
+		result.success = true;
 		result.status = 200;
 		result.data = [Object.assign({id: res.id}, res.data())];
 		return result;
 	}catch(err){
 		console.log('an error has occurred writing to firebase', err);
+		result.success = false;
 		result.status = 500;
 		result.msg = 'a network error has occurred';
 		result.error = err;

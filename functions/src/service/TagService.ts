@@ -1,10 +1,17 @@
 import {fetchDocument, updateDoc, deleteFields} from "../util/Firestore";
 import Result from "../dto/Result";
 
+
 export const addTags = async (user: string, tags: Array<string>) => {
 	console.log('attempting to add', tags, 'to', user);
 	const mappedTags = mapIncomingTags(tags);
 	return await updateDoc(`tags/${user}`, mappedTags);
+};
+export const addNewTags = async (user:string, tags: Array<string>) => {
+	const customTags = await fetchCustomTags(user);
+	if(!customTags.success) return customTags;
+	const newTags = tags.filter(tag => customTags.data.indexOf(tag) === -1)
+	return await addTags(user, newTags);
 };
 export const addTag = async (user: string, tag: string) => await addTags(user, [tag]);
 export const removeTags = async (user: string, tags: Array<string>) => {

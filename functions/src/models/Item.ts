@@ -146,6 +146,9 @@ export default class Item {
 		const thisMonthCost = this._amount * summary.thisMonth.length;
 		return {
 			todayAmount: todayCost,
+			todayCount: summary.today.length,
+			thisWeekCount: summary.thisWeek.length,
+			thisMonthCount: summary.thisMonth.length,
 			thisWeekAmount: thisWeekCost,
 			thisMonthAmount: thisMonthCost,
 			absoluteTotal: thisMonthCost + todayCost + thisWeekCost,

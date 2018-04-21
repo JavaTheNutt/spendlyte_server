@@ -45,6 +45,7 @@ export const fetchForDelivery = async (userId: string, amount: number = 0, verbo
 	res.data = mapForDelivery(res.data, amount, verbose, months, records, dates);
 	return res;
 };
+
 export const fetchSummary= async(userId: string, list?: boolean): Promise<Result> => {
 	console.log('attempting to fetch summary stats');
 	const items = await fetchItems(userId);

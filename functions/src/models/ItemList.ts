@@ -14,7 +14,7 @@ export default class ItemList {
 
 	generateSummary(list:boolean = false){
 		console.log('item list attempting to generate summary details');
-		const summaryList = this._items.map(item => item.generateSummary());
+		let summaryList = this._items.map(item => item.generateSummary());
 		console.log(summaryList.length, 'summaries generated');
 		const totalDayIncome = summaryList
 			.filter(item => item.finance.realTotal > 0)
@@ -26,6 +26,39 @@ export default class ItemList {
 			.reduce((acc, current) => acc + current, 0);
 		const totalDayBalance = summaryList
 			.map(item => item.finance.todayAmount * item.finance.direction)
+			.reduce((acc, current) => acc + current, 0);
+		const totalDayIncomeCount = summaryList
+			.filter(item => item.finance.direction > 0)
+			.map(item => item.finance.todayCount)
+			.reduce((acc, current) => acc + current, 0);
+		const totalDayExpenseCount = summaryList
+			.filter(item => item.finance.direction < 0)
+			.map(item => item.finance.todayCount)
+			.reduce((acc, current) => acc + current, 0);
+		const totalDayTransactionCount = summaryList
+			.map(item => item.finance.todayCount)
+			.reduce((acc, current) => acc + current, 0);
+		const totalWeekIncomeCount = summaryList
+			.filter(item => item.finance.direction > 0)
+			.map(item => item.finance.thisWeekCount)
+			.reduce((acc, current) => acc + current, 0);
+		const totalWeekExpenseCount = summaryList
+			.filter(item => item.finance.direction < 0)
+			.map(item => item.finance.thisWeekCount)
+			.reduce((acc, current) => acc + current, 0);
+		const totalWeekTransactionCount = summaryList
+			.map(item => item.finance.thisWeekCount)
+			.reduce((acc, current) => acc + current, 0);
+		const totalMonthIncomeCount = summaryList
+			.filter(item => item.finance.direction > 0)
+			.map(item => item.finance.thisMonthCount)
+			.reduce((acc, current) => acc + current, 0);
+		const totalMonthExpenseCount = summaryList
+			.filter(item => item.finance.direction < 0)
+			.map(item => item.finance.thisMonthCount)
+			.reduce((acc, current) => acc + current, 0);
+		const totalMonthTransactionCount = summaryList
+			.map(item => item.finance.thisMonthCount)
 			.reduce((acc, current) => acc + current, 0);
 		const totalWeeklyIncome = summaryList
 			.filter(item => item.finance.direction > 0)
@@ -49,37 +82,47 @@ export default class ItemList {
 		const totalMonthlyBalance = summaryList
 			.map(item => item.finance.thisMonthAmount * item.finance.direction)
 			.reduce((acc, current) => acc + current, 0);
-
+		summaryList = summaryList.filter(item => item.dates.today.length + item.dates.thisWeek.length + item.dates.thisMonth.length > 0);
 		const data = {
 			itemSummary: summaryList,
 			finance: {
 				daily: {
 					income: totalDayIncome,
 					expense: totalDayExpense,
-					balance: totalDayBalance
+					balance: totalDayBalance,
+					incomeCount: totalDayIncomeCount,
+					expenseCount: totalDayExpenseCount
 				},
 				weekly: {
 					inc: {
 						income: totalDayIncome + totalWeeklyIncome,
 						expense: totalDayExpense + totalWeeklyExpense,
-						balance: totalDayBalance +totalWeeklyBalance
+						balance: totalDayBalance +totalWeeklyBalance,
+						incomeCount: totalDayIncomeCount + totalWeekIncomeCount,
+						expenseAccount: totalDayExpenseCount + totalWeekExpenseCount
 					},
 					exc: {
 						income: totalWeeklyIncome,
 						expense: totalWeeklyExpense,
-						balance: totalWeeklyBalance
+						balance: totalWeeklyBalance,
+						incomeCount: totalWeekIncomeCount,
+						expenseAccount: totalWeekExpenseCount
 					}
 				},
 				monthly: {
 					inc: {
 						income: totalDayIncome + totalWeeklyIncome + totalMonthlyIncome,
 						expense: totalDayExpense + totalWeeklyExpense + totalMonthlyExpense,
-						balance: totalDayBalance + totalWeeklyBalance + totalMonthlyBalance
+						balance: totalDayBalance + totalWeeklyBalance + totalMonthlyBalance,
+						incomeCount: totalDayIncomeCount + totalWeekIncomeCount + totalMonthIncomeCount,
+						expenseAccount: totalDayExpenseCount + totalWeekExpenseCount + totalMonthExpenseCount
 					},
 					exc: {
 						income: totalMonthlyIncome,
 						expense: totalMonthlyExpense,
-						balance: totalMonthlyBalance
+						balance: totalMonthlyBalance,
+						incomeCount: totalMonthIncomeCount,
+						expenseAccount: totalMonthExpenseCount
 					}
 				}
 			}

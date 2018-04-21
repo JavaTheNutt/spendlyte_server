@@ -1,7 +1,11 @@
 import DateManagement from "./DateManagement";
 import MonthlyDateManagement, {MonthlyFrequencyType} from "./MonthlyDateManagement";
 import RecurringDateManagement, {Frequency} from "./RecurringDateManagement";
+import * as isToday from 'date-fns/is_today';
+import * as isAfter from 'date-fns/is_after';
 import * as isBefore from 'date-fns/is_before';
+import PastRecords from "./PastRecords";
+import PastRecord from "./PastRecord";
 
 type dateLayout = {
 	isRecurring: boolean;
@@ -19,9 +23,8 @@ export default class Item {
 	private _amount: number;
 	readonly _tags: Array<string>;
 	readonly _dates: DateManagement;
-	readonly _dailyTotal: number;
-	readonly _weeklyTotal: number;
-	readonly _monthlyTotal: number;
+	private _pastRecords: PastRecords;
+
 
 	constructor(
 		title: string,
@@ -29,6 +32,7 @@ export default class Item {
 		direction: 1|-1 = -1,
 		dates: dateLayout,
 		tags: Array<string> = [],
+		pastRecords?: PastRecords,
 		id?: string)
 	{
 			this._id = id;
@@ -36,7 +40,17 @@ export default class Item {
 			this._amount = amount;
 			this._tags = tags;
 			this._dates = createDateManagement(dates);
-			this._direction = direction
+			this._direction = direction;
+			if(pastRecords) this._pastRecords = pastRecords;
+			else {
+				console.log('past records does not exist, generating from dates');
+				const mappedPastRecords: Array<PastRecord> = [];
+				this.dates.dates.forEach(date => {
+					console.log('attempting to convert date', date, 'to past record');
+					mappedPastRecords.push(new PastRecord(date, this._amount))
+				});
+				this._pastRecords = new PastRecords(mappedPastRecords);
+			}
 	}
 
 	get id(): string {
@@ -76,7 +90,12 @@ export default class Item {
 	get direction(): 1 | -1 {
 		return this._direction;
 	}
-
+	set pastRecords(records: PastRecords) {
+		this._pastRecords = records;
+	}
+	get pastRecords():PastRecords{
+		return this._pastRecords;
+	}
 	getAmountForDates() {
 		return this._amount * this._dates.dates.length;
 	}
@@ -94,6 +113,16 @@ export default class Item {
 		}
 	}
 
+	/*getOverdue () {
+		console.log('fetching overdue dates for record with title', this._title);
+		const today = new Date();
+		if(isToday(this._lastCompletedDate) || isAfter(this._lastCompletedDate, today)) return [];
+		console.log('last completed before today');
+		const overdueDates =  this._dates.dates.filter(date => isAfter(this._lastCompletedDate, date) && isBefore(today, date))
+		console.log('number of overdue dates found:', overdueDates.length);
+		return overdueDates;
+	}*/
+
 	formatForDelivery(amount: number = 0, verbose: boolean = false, months: boolean = false){
 		console.log('formatting for delivery in Item model, fetching months?', true);
 		const base = {
@@ -102,7 +131,8 @@ export default class Item {
 			tags: this.tags,
 			dates: this.dates.formatForDelivery(amount, verbose, months),
 			isIncome: this._direction > 0,
-			totalForDates: this.getAmountForDates()
+			totalForDates: this.getAmountForDates(),
+			pastRecords: this._pastRecords.formatForDelivery()
 		};
 		return verbose ? Object.assign(base, {
 			totalForDates: this.getAmountForDates()
@@ -127,7 +157,8 @@ export default class Item {
 			title: this._title,
 			amount: this._amount,
 			dates: this._dates.getMonthSummary(),
-			finance: this.generateFianancialSummary()
+			finance: this.generateFianancialSummary(),
+			records: this._pastRecords.formatForDelivery()
 		}
 	}
 	getFinancialSummary(){

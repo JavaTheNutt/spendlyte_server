@@ -88,7 +88,7 @@ export const deleteFields = (path: string, fields: Array<string>): Promise<Resul
 		});
 		console.log('all delete events dispatched');
 		Promise.all(deletePromises).then(() => {
-			console.log('all delete events completed');
+			console.log('all delete events lastCompletedDate');
 			res.status = 200;
 			res.success = true;
 			res.data = [];

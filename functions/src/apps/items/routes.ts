@@ -20,7 +20,7 @@ export default (app: Application) => {
 		const amountDetails = req.query.amount || req.query.months || 0;
 		const logStr = !!req.query.months ? `attempting to fetch ${req.query.months} months worth of records` : `attempting to fetch ${req.query.amount} records`;
 		console.log(logStr);
-		fetchForDelivery(req.user.uid, amountDetails, req.query.verbose, !!req.query.months).then(result => {
+		fetchForDelivery(req.user.uid, amountDetails, req.query.verbose, !!req.query.months, req.query.records).then(result => {
 			console.log('data fetched successfully');
 			res.status(result.status || result.success ? 200 : 500).send(result.data);
 		}).catch(err => {

@@ -22,7 +22,7 @@ describe('ItemService', () => {
 		};
 		it('should return an item from the details', () => {
 			const item = itemService.mapItem(itemDetails);
-			console.log(item.formatForDelivery(4, true));
+			//console.log(item.formatForDelivery(4, true));
 			expect(item).to.be.instanceOf(Item);
 		})
 	});

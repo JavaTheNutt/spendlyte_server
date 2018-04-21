@@ -4,11 +4,16 @@ import Result from "../dto/Result";
 import {mapSnapshot} from "../util/Firestore";
 import DateManagement from "../models/DateManagement";
 import ItemList from "../models/ItemList";
+import PastRecord from "../models/PastRecord";
+import PastRecords from "../models/PastRecords";
 
 export const saveNewItem = async (userId:string, item: Item): Promise<Result> => {
+	console.log('attempting to save new item');
 	const result = new Result();
 	try {
+		const pastList  = Object.assign([], item.pastRecords.records);
 		const res = await (await firestore().collection(`items/${userId}/records`).add(item.formatForSaving())).get();
+		await addPastRecords(userId, res.id, pastList);
 		result.status = 200;
 		result.data = [Object.assign({id: res.id}, res.data())];
 		return result;
@@ -20,10 +25,23 @@ export const saveNewItem = async (userId:string, item: Item): Promise<Result> =>
 		return result;
 	}
 };
-export const fetchForDelivery = async (userId: string, amount: number = 0, verbose:boolean = false, months?: boolean) => {
+export const addPastRecords = (userId: string, docId: string, docs: Array<PastRecord>) => {
+	console.log('attempting to add past records');
+	const promises = [];
+	docs.forEach(doc => {
+		console.log('attempting to add', doc, 'to collection');
+		const formattedDoc = doc.formatForSaving();
+		console.log('formatted doc',formattedDoc);
+		promises.push(firestore().collection(`items/${userId}/records/${docId}/past`).add(formattedDoc));
+	});
+	return new Promise((resolve, reject) => Promise.all(promises).then(() => resolve()).catch(err => reject(err)))
+
+};
+export const fetchForDelivery = async (userId: string, amount: number = 0, verbose:boolean = false, months?: boolean, records?: boolean) => {
 	console.log('fetching for months in fetch function?', months);
-	const res = await fetchItems(userId);
+	const res = await fetchItems(userId, records);
 	if(!res.success) return res;
+	console.log('res', res);
 	res.data = mapForDelivery(res.data, amount, verbose, months);
 	return res;
 };
@@ -35,14 +53,48 @@ export const fetchSummary= async(userId: string, list?: boolean): Promise<Result
 	items.data = [new ItemList(items.data).generateSummary(list)];
 	return items;
 };
-export const fetchItems = async (userId:string): Promise<Result> => {
+export const fetchAllPast = async (userId:string, items:Array<Item>): Promise<Result> => {
+	const newItems = [];
+	for (let i = 0; i < items.length; i++) {
+		const res = await fetchPast(userId, items[i]);
+		if(!res.success) return res;
+		newItems.concat(res.data);
+	}
+	return new Result(true, newItems, 200);
+};
+export const fetchPast = async (userId: string, item: Item) => {
+	console.log('attempting to fetch past records for user', userId, 'from doc', item.id);
+	const result = new Result();
+	try{
+		const res = await firestore().collection(`items/${userId}/records/${item.id}/past`).get();
+		const objMappedResults = mapSnapshot(res);
+		const recordMappedResults = objMappedResults.map(record => mapRecord(record));
+		item.pastRecords = new PastRecords(recordMappedResults);
+		result.status = 200;
+		result.data = [item];
+		result.success = true;
+		return result;
+	}catch (error){
+		console.log('an error has occurred fetching past records');
+		result.success = false;
+		result.status = 500;
+		result.error = error;
+		result.msg = 'an error occurred while fetching records';
+		return result;
+	}
+};
+export const fetchItems = async (userId:string, records: boolean = false): Promise<Result> => {
 	const result = new Result();
 	try{
 		const res = await firestore().collection(`items/${userId}/records`).get();
 		const objectMappedResults = mapSnapshot(res);
 		//console.log('result mapped as object',objectMappedResults);
 		const itemMappedResults = objectMappedResults.map(item => mapItem(item));
-		//console.log('result mapped as item',itemMappedResults);
+		if(records){
+			console.log('fetching past records');
+			const pastRes = await fetchAllPast(userId, itemMappedResults);
+			if(!pastRes.success) return pastRes;
+		}
 		result.success = true;
 		result.status = 302;
 		result.data = itemMappedResults;
@@ -67,8 +119,31 @@ export const mapItem = (itemDetails:any):Item => {
 		freq02: itemDetails.dates.freq02,
 		type: itemDetails.dates.freqType
 	};
-	return new Item(itemDetails.title, itemDetails.amount, itemDetails.isIncome ? 1 : -1, dateDetails, itemDetails.tags, itemDetails.id)
+	return new Item(itemDetails.title, itemDetails.amount, itemDetails.isIncome ? 1 : -1, dateDetails, itemDetails.tags,null, itemDetails.id)
 };
+export const mapItemWithRecords = async (userId: string, itemDetails: any) => {
+	console.log('attempting to map item, with past records, for user', userId);
+	console.log('details:', itemDetails);
+	const dateDetails = {
+		isRecurring: !!itemDetails.dates.frequency,
+		dates: itemDetails.dates.dates,
+		frequency: itemDetails.dates.frequency,
+		interval: itemDetails.dates.interval,
+		freq01: itemDetails.dates.freq01,
+		freq02: itemDetails.dates.freq02,
+		type: itemDetails.dates.freqType
+	};
+	const records = await fetchPast(userId, itemDetails.id);
+	if(!records.success) return records;
+	console.log('records fetched:', records.data.length);
+	console.log('details:', records.data);
+	const recordData = records.data.map(record => mapRecord(record));
+	records.data = [new Item(itemDetails.title, itemDetails.amount, itemDetails.isIncome ? 1 : -1, dateDetails, itemDetails.tags,new PastRecords(recordData), itemDetails.id)];
+	return records;
+};
+
+export const mapRecord = (recordDetails:any) => new PastRecord(recordDetails.date, recordDetails.budgeted, recordDetails.actual, recordDetails.completed)
+
 
 export const mapForDelivery = (items: Array<Item>, amount:number = 0, verbose:boolean=false, months?:boolean) => {
 	console.log('generating months in map function?', true);

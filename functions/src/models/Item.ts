@@ -91,6 +91,7 @@ export default class Item {
 		return this._direction;
 	}
 	set pastRecords(records: PastRecords) {
+		console.log('setting past record of', this._id, 'to', records);
 		this._pastRecords = records;
 	}
 	get pastRecords():PastRecords{
@@ -123,22 +124,21 @@ export default class Item {
 		return overdueDates;
 	}*/
 
-	formatForDelivery(amount: number = 0, verbose: boolean = false, months: boolean = false){
-		console.log('formatting for delivery in Item model, fetching months?', true);
-		const base = {
+	formatForDelivery(amount: number = 0, verbose: boolean = false, months: boolean = false, records: boolean = false, dates:boolean = false){
+		console.log('formatting for delivery in Item model, fetching months?', months);
+		let base = {
 			title: this.title,
 			amount: this.amount,
 			tags: this.tags,
-			dates: this.dates.formatForDelivery(amount, verbose, months),
 			isIncome: this._direction > 0,
-			totalForDates: this.getAmountForDates(),
-			pastRecords: this._pastRecords.formatForDelivery(),
 			id: this._id
 		};
-		return verbose ? Object.assign(base, {
-			totalForDates: this.getAmountForDates()
-		}): base;
+		if(records) base = Object.assign({pastRecords: this._pastRecords.formatForDelivery()}, base);
+		if(verbose) base = Object.assign({totalForDates:this.getAmountForDates()}, base);
+		if(dates) base = Object.assign({dates: this.dates.formatForDelivery(amount, verbose, months)}, base);
+		return base;
 	}
+
 	generateFianancialSummary () {
 		const summary = this._dates.getMonthSummary();
 		const todayCost = this._amount * summary.today.length;

@@ -37,12 +37,12 @@ export const addPastRecords = (userId: string, docId: string, docs: Array<PastRe
 	return new Promise((resolve, reject) => Promise.all(promises).then(() => resolve()).catch(err => reject(err)))
 
 };
-export const fetchForDelivery = async (userId: string, amount: number = 0, verbose:boolean = false, months?: boolean, records?: boolean) => {
+export const fetchForDelivery = async (userId: string, amount: number = 0, verbose:boolean = false, months: boolean = false, records: boolean = false, dates:boolean = false) => {
 	console.log('fetching for months in fetch function?', months);
 	const res = await fetchItems(userId, records);
 	if(!res.success) return res;
 	console.log('res', res);
-	res.data = mapForDelivery(res.data, amount, verbose, months);
+	res.data = mapForDelivery(res.data, amount, verbose, months, records, dates);
 	return res;
 };
 export const fetchSummary= async(userId: string, list?: boolean): Promise<Result> => {
@@ -146,18 +146,29 @@ export const mapItemWithRecords = async (userId: string, itemDetails: any) => {
 
 export const mapRecord = (recordDetails:any) => new PastRecord(recordDetails.date, recordDetails.budgeted, recordDetails.actual, recordDetails.completed, recordDetails.id);
 
-/*export const updatePastRecord = async (userId: string, docId: string, recordId: string, newData: any) => {
+export const updatePastRecord = async (userId: string, docId: string, recordId: string, newData: any) => {
+	const result = new Result();
 	console.log('attempting to update past record with id', recordId, 'in doc', docId, 'for user', userId);
 	console.log('new details', newData);
 	try {
-		const result = firestore().doc(`items/${userId}/records/${docId}/past/${recordId}`).set(newData, {merge: true});
-
+		await firestore().doc(`items/${userId}/records/${docId}/past/${recordId}`).set(newData, {merge: true});
+		result.success = true;
+		result.status = 200;
+		result.data = [];
+		return result;
+	}catch (error){
+		console.log('error while updating past record, error:', error);
+		result.success = false;
+		result.status = 500;
+		result.error = error;
+		result.msg = 'an error occurred while updating past record';
+		return result;
 	}
-};*/
+};
 
-export const mapForDelivery = (items: Array<Item>, amount:number = 0, verbose:boolean=false, months?:boolean) => {
+export const mapForDelivery = (items: Array<Item>, amount:number = 0, verbose:boolean=false, months:boolean = false, records: boolean = false, dates:boolean=false) => {
 	console.log('generating months in map function?', true);
-	return items.map(item => item.formatForDelivery(amount, verbose, months));
+	return items.map(item => item.formatForDelivery(amount, verbose, months, records, dates));
 };
 
 

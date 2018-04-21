@@ -3,12 +3,14 @@ export default class PastRecord {
 	private _budgeted: number;
 	private _actual: number;
 	private _completed: boolean;
+	private _id: string;
 
-	constructor(date: string, budgeted: number, actual?: number, completed: boolean = false) {
+	constructor(date: string, budgeted: number, actual?: number, completed: boolean = false, id?:string) {
 		this._date = date;
 		this._budgeted = budgeted;
 		this._actual = actual;
 		this._completed = completed;
+		this._id = id;
 	}
 
 
@@ -43,6 +45,11 @@ export default class PastRecord {
 	set completed(value: boolean) {
 		this._completed = value;
 	}
+
+	get id(): string {
+		return this._id;
+	}
+
 	getDifference() {
 		return !this.actual ? 0 : this.budgeted - this.actual
 	}
@@ -57,6 +64,6 @@ export default class PastRecord {
 		return data;
 	}
 	formatForDelivery () {
-		return Object.assign({difference: this.getDifference()}, this.formatForSaving())
+		return Object.assign({difference: this.getDifference(), id: this._id}, this.formatForSaving())
 	}
 }

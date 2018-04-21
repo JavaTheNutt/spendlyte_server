@@ -68,7 +68,9 @@ export const fetchPast = async (userId: string, item: Item) => {
 	try{
 		const res = await firestore().collection(`items/${userId}/records/${item.id}/past`).get();
 		const objMappedResults = mapSnapshot(res);
+		console.log('fetched past records:', objMappedResults);
 		const recordMappedResults = objMappedResults.map(record => mapRecord(record));
+		console.log('mapped past records:', recordMappedResults);
 		item.pastRecords = new PastRecords(recordMappedResults);
 		result.status = 200;
 		result.data = [item];
@@ -142,8 +144,16 @@ export const mapItemWithRecords = async (userId: string, itemDetails: any) => {
 	return records;
 };
 
-export const mapRecord = (recordDetails:any) => new PastRecord(recordDetails.date, recordDetails.budgeted, recordDetails.actual, recordDetails.completed)
+export const mapRecord = (recordDetails:any) => new PastRecord(recordDetails.date, recordDetails.budgeted, recordDetails.actual, recordDetails.completed, recordDetails.id);
 
+/*export const updatePastRecord = async (userId: string, docId: string, recordId: string, newData: any) => {
+	console.log('attempting to update past record with id', recordId, 'in doc', docId, 'for user', userId);
+	console.log('new details', newData);
+	try {
+		const result = firestore().doc(`items/${userId}/records/${docId}/past/${recordId}`).set(newData, {merge: true});
+
+	}
+};*/
 
 export const mapForDelivery = (items: Array<Item>, amount:number = 0, verbose:boolean=false, months?:boolean) => {
 	console.log('generating months in map function?', true);

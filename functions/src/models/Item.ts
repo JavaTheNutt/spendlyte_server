@@ -132,7 +132,8 @@ export default class Item {
 			dates: this.dates.formatForDelivery(amount, verbose, months),
 			isIncome: this._direction > 0,
 			totalForDates: this.getAmountForDates(),
-			pastRecords: this._pastRecords.formatForDelivery()
+			pastRecords: this._pastRecords.formatForDelivery(),
+			id: this._id
 		};
 		return verbose ? Object.assign(base, {
 			totalForDates: this.getAmountForDates()

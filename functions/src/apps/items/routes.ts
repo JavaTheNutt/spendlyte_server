@@ -1,7 +1,6 @@
 import {Application, Response} from "express";
 import {IRequest} from "../../../types/c_express";
-import {saveNewItem, fetchForDelivery, fetchSummary, updatePastRecord} from "../../service/ItemService";
-import Result from "../../dto/Result";
+import {saveNewItem, fetchForDelivery, fetchSummary, updatePastRecord, addPastRecords} from "../../service/ItemService";
 import Item from "../../models/Item";
 import {addNewTags} from "../../service/TagService";
 
@@ -39,7 +38,8 @@ export default (app: Application) => {
 	});
 	app.get('/summary', (req: IRequest, res: Response) => {
 		console.log('attempting to fetch summary stats for user', req.user.uid);
-		fetchSummary(req.user.uid, req.query.list).then(result => {
+		fetchSummary(req.user.uid, req.query.list, req.query.summary, req.query.past).then(result => {
+			console.log('result of summary fetch', result);
 			res.status(result.status || result.success ? 200 : 500).send(result.data[0]);
 		}).catch(err => {
 			console.log('an error has occurred', err);
@@ -54,7 +54,17 @@ export default (app: Application) => {
 			console.log('an error has occurred', err);
 			res.status(500).send({msg: 'an error has occurred while updating record'})
 		})
-	})
+	});
+	app.post('/past/:docId', (req: IRequest, res: Response) => {
+		console.log('attempting to add doc', req.params.docId, 'record', req.params.recordId);
+		if(!Array.isArray(req.body)) req.body = [req.body];
+		addPastRecords(req.user.uid, req.params.docId, req.body).then(() => {
+			res.status(200).send('added successfully');
+		}).catch(err => {
+			console.log('an error has occurred', err);
+			res.status(500).send({msg: 'an error has occurred while updating record'})
+		})
+	});
 }
 
 const createItemIn = (details): Item => {

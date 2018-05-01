@@ -176,11 +176,17 @@ export default class DateManagement {
 	}
 	getMonthSummary (): {today:Array<string>, thisWeek:Array<string>, thisMonth:Array<string>}{
 		let monthDates = this.getWithinMonths(1);
+		console.log('month dates generated');
+		console.log('dates fetched:', monthDates);
 		const today = new Date();
 		const todayDates = monthDates.filter(date => isToday(date));
+		console.log('dates occurring today:', todayDates);
 		monthDates = monthDates.filter(date => !isToday(date));
-		const weekDates = monthDates.filter(date => isAfter(date, addDays(today, 1)) && isBefore(date, addDays(today, 7)));
-		monthDates = monthDates.filter(date => isAfter(date, addDays(today, 1)) && !isBefore(date, addDays(today, 7)));
+		console.log('this months dates excluding todays dates:', monthDates);
+		const weekDates = monthDates.filter(date => isAfter(date, today) && isBefore(date, addDays(today, 6)));
+		console.log('this weeks dates', weekDates);
+		monthDates = monthDates.filter(date => isAfter(date, today) && !isBefore(date,  addDays(today, 6)));
+		console.log('this months dates excluding this weeks dates', monthDates);
 		return {
 			today: todayDates,
 			thisWeek: weekDates,

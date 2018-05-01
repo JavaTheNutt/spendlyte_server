@@ -45,10 +45,12 @@ export default class MonthlyDateManagement extends RecurringDateManagement {
 	}
 
 	getNextDates(amount: number = 1, refresh:boolean = true): Array<string> {
+		console.log('attempting to fetch', amount, 'monthly records');
 		if(refresh) super.resetGeneratedDates();
 		let latestDate = this.getLatestDate();
 		switch (this._type) {
 			case MonthlyFrequencyType.INTERVAL:
+				console.log('frequency type is interval, fetching dates for the', this._freq01, 'of the month')
 				for (let i = 0; i < amount; i++) {
 					const newLatestDate = getNextInvDate(latestDate, this._freq01, this._interval);
 					console.log('new latest date:', newLatestDate);
@@ -58,6 +60,7 @@ export default class MonthlyDateManagement extends RecurringDateManagement {
 				}
 				break;
 			case MonthlyFrequencyType.DAY_IN_MONTH:
+				console.log('frequency type is day in month, attempting to fetch records for the', this._freq01, 'day in each month');
 				for (let i = 0; i < amount; i++) {
 					const newLatestDate = getNextDimDate(latestDate, +this._freq01, this._interval);
 					this._dates.push(newLatestDate);
@@ -66,6 +69,7 @@ export default class MonthlyDateManagement extends RecurringDateManagement {
 				}
 				break;
 			case MonthlyFrequencyType.WEEKDAY_IN_MONTH:
+				console.log('frequency type is week day in month, attempting to fetch records for the', this._freq01, this._freq02, 'of every month');
 				for (let i = 0; i < amount; i++) {
 					const newLatestDate = getNextWdimDate(latestDate, this._freq02, this._freq01, this._interval);
 					this._dates.push(newLatestDate);
@@ -121,13 +125,13 @@ const getNextInvDate = (date: string, inv: string = 'start', interval = 1): stri
 			return format(startOfMonth(newDate), 'YYYY-MM-DD');
 	}
 };
-const getNextDimDate = (date: string, monthDate: number, interval): string => format(addMonths(date, interval).setDate(monthDate));
+const getNextDimDate = (date: string, monthDate: number, interval): string => format(addMonths(date, interval).setDate(monthDate), 'YYYY-MM-DD');
 
 const getNextWdimDate = (date: string, weekDay: string, monthPlace: string, interval: number = 1): string => {
 	let weekPlace = 0;
 	console.log('attempting to create wdim date record for every ', monthPlace, weekDay, 'of the month');
-	console.log('weekday number', weekDayMappings[weekDay]);
-	const nextDate = setDay(startOfMonth(addMonths(date, interval)), weekDayMappings[weekDay]);
+	console.log('weekday number', weekDayMappings[weekDay.toLowerCase()]);
+	const nextDate = setDay(startOfMonth(addMonths(date, interval)), weekDayMappings[weekDay.toLowerCase()]);
 	console.log('nextDate', nextDate);
 	switch (monthPlace) {
 		case 'first':

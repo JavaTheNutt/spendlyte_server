@@ -30,14 +30,20 @@ export const saveNewItem = async (userId:string, item: Item): Promise<Result> =>
 export const addPastRecords = (userId: string, docId: string, docs: Array<PastRecord>) => {
 	console.log('attempting to add past records');
 	const promises = [];
-	docs.forEach(doc => {
-		console.log('attempting to add', doc, 'to collection');
-		const formattedDoc = doc.formatForSaving();
-		console.log('formatted doc',formattedDoc);
-		promises.push(firestore().collection(`items/${userId}/records/${docId}/past`).add(formattedDoc));
+	return new Promise((resolve, reject) => {
+		try {
+			docs.forEach(doc => {
+				console.log('attempting to add', doc, 'to collection');
+				const formattedDoc = mapRecord(doc).formatForSaving();
+				console.log('formatted doc',formattedDoc);
+				promises.push(firestore().collection(`items/${userId}/records/${docId}/past`).add(formattedDoc));
+			});
+			Promise.all(promises).then(() => resolve()).catch(err => reject(err))
+		}catch (err) {
+			console.log('erorr occurred adding past records', err);
+			reject(err);
+		}
 	});
-	return new Promise((resolve, reject) => Promise.all(promises).then(() => resolve()).catch(err => reject(err)))
-
 };
 export const fetchForDelivery = async (userId: string, amount: number = 0, verbose:boolean = false, months: boolean = false, records: boolean = false, dates:boolean = false) => {
 	console.log('fetching for months in fetch function?', months);
@@ -48,21 +54,30 @@ export const fetchForDelivery = async (userId: string, amount: number = 0, verbo
 	return res;
 };
 
-export const fetchSummary= async(userId: string, list?: boolean): Promise<Result> => {
+export const fetchSummary= async(userId: string, list?: boolean, summary?: boolean, past?:boolean): Promise<Result> => {
 	console.log('attempting to fetch summary stats');
 	const items = await fetchItems(userId);
 	if(!items.success) return items;
+	let itemList = new ItemList(items.data);
+	if(past){
+		const newItemlist = await fetchAllPast(userId, itemList.items);
+		if(!newItemlist.success) return newItemlist;
+		console.log('past records fetched without error', newItemlist);
+		itemList = new ItemList(newItemlist.data);
+	}
 	console.log('items fetched without error');
-	items.data = [new ItemList(items.data).generateSummary(list)];
+	items.data = [itemList.generateSummary(list, summary)];
 	return items;
 };
 export const fetchAllPast = async (userId:string, items:Array<Item>): Promise<Result> => {
-	const newItems = [];
+	console.log('attempting to fetch all past records for items', items);
+	let newItems = [];
 	for (let i = 0; i < items.length; i++) {
 		const res = await fetchPast(userId, items[i]);
 		if(!res.success) return res;
-		newItems.concat(res.data);
+		newItems = newItems.concat(res.data);
 	}
+	console.log('returning new items', newItems);
 	return new Result(true, newItems, 200);
 };
 export const fetchPast = async (userId: string, item: Item) => {

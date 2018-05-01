@@ -12,9 +12,10 @@ export default class ItemList {
 		return this._items;
 	}
 
-	generateSummary(list:boolean = false){
+	generateSummary(list:boolean = false, summary: boolean = false){
 		console.log('item list attempting to generate summary details');
 		let summaryList = this._items.map(item => item.generateSummary());
+		if(list && ! summary) return summaryList;
 		console.log(summaryList.length, 'summaries generated');
 		const totalDayIncome = summaryList
 			.filter(item => item.finance.realTotal > 0)
@@ -66,7 +67,7 @@ export default class ItemList {
 			.reduce((acc, current) => acc + current, 0);
 		const totalWeeklyExpense = summaryList
 			.filter(item => item.finance.direction < 0)
-			.map(item => item.finance.todayAmount)
+			.map(item => item.finance.thisWeekAmount)
 			.reduce((acc, current) => acc + current, 0);
 		const totalWeeklyBalance = summaryList
 			.map(item => item.finance.thisWeekAmount * item.finance.direction)
@@ -99,14 +100,14 @@ export default class ItemList {
 						expense: totalDayExpense + totalWeeklyExpense,
 						balance: totalDayBalance +totalWeeklyBalance,
 						incomeCount: totalDayIncomeCount + totalWeekIncomeCount,
-						expenseAccount: totalDayExpenseCount + totalWeekExpenseCount
+						expenseCount: totalDayExpenseCount + totalWeekExpenseCount
 					},
 					exc: {
 						income: totalWeeklyIncome,
 						expense: totalWeeklyExpense,
 						balance: totalWeeklyBalance,
 						incomeCount: totalWeekIncomeCount,
-						expenseAccount: totalWeekExpenseCount
+						expenseCount: totalWeekExpenseCount
 					}
 				},
 				monthly: {
@@ -115,14 +116,14 @@ export default class ItemList {
 						expense: totalDayExpense + totalWeeklyExpense + totalMonthlyExpense,
 						balance: totalDayBalance + totalWeeklyBalance + totalMonthlyBalance,
 						incomeCount: totalDayIncomeCount + totalWeekIncomeCount + totalMonthIncomeCount,
-						expenseAccount: totalDayExpenseCount + totalWeekExpenseCount + totalMonthExpenseCount
+						expenseCount: totalDayExpenseCount + totalWeekExpenseCount + totalMonthExpenseCount
 					},
 					exc: {
 						income: totalMonthlyIncome,
 						expense: totalMonthlyExpense,
 						balance: totalMonthlyBalance,
 						incomeCount: totalMonthIncomeCount,
-						expenseAccount: totalMonthExpenseCount
+						expenseCount: totalMonthExpenseCount
 					}
 				}
 			}

@@ -2,6 +2,12 @@
 
 _A finance tracker backend built with NodeJS, Express, Typescript and Firebase-Admin_
 
+Name | URL
+:---: | :---:
+Application | [https://spendlyte.com](https://spendlyte.com)
+Report Repo | [https://github.com/JavaTheNutt/spendlyte_reports](https://github.com/JavaTheNutt/spendlyte_reports)
+Client Repo | [https://github.com/JavaTheNutt/spendlyte_client01](https://github.com/JavaTheNutt/spendlyte_client01)
+
 ## Outline
 
 This is a backend infrastructure built for deployment to [Firebase Cloud Functions](https://firebase.google.com/docs/functions/). It is primarily designed to save items to a database and perform financial aggregations on this data. This acts as the server for [the client application]()
